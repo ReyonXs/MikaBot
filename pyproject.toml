@@ -12,6 +12,7 @@ dependencies = [
     "nonebot-plugin-alconna>=0.62.0",
     "nonebot-plugin-orm>=0.8.3",
     "nonebot-plugin-htmlkit>=0.1.0rc5",
+    "furl>=2.1.4",
 ]
 
 [project.optional-dependencies]
