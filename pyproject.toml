@@ -13,6 +13,7 @@ dependencies = [
     "nonebot-plugin-orm>=0.8.3",
     "nonebot-plugin-htmlkit>=0.1.0rc5",
     "furl>=2.1.4",
+    "numpy>=2.2.6",
 ]
 
 [project.optional-dependencies]
