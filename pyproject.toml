@@ -14,6 +14,7 @@ dependencies = [
     "nonebot-plugin-htmlkit>=0.1.0rc5",
     "furl>=2.1.4",
     "numpy>=2.2.6",
+    "pillow>=12.2.0",
 ]
 
 [project.optional-dependencies]
