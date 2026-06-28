@@ -120,6 +120,8 @@ multiline-quotes = "single"
 pythonVersion = "3.14"
 pythonPlatform = "All"
 typeCheckingMode = "standard"
+venvPath = "."
+venv = ".venv"
 
 [dependency-groups]
 dev = [
