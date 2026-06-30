@@ -4,6 +4,7 @@ from furl import furl
 from pydantic import BaseModel, ConfigDict, Field
 
 HEADERS = {
+    'Cookie': '',
     'Referer': 'https://www.pixiv.net/'
 }
 LOLICON_API = furl('https://api.lolicon.app/setu/v2')
