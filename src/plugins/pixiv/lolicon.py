@@ -18,7 +18,9 @@ _MESSAGE_SEPARATOR = '\n————\n'
 _lolicon_request_lock = asyncio.Lock()
 
 
-async def get_random_picture_message(args: LoliconConfig) -> Message | None:
+async def get_random_picture_message(
+    args: LoliconConfig, *, is_private: bool
+) -> Message | None:
     if _lolicon_request_lock.locked():
         return Message(MessageSegment.text(_LOLICON_BUSY_MESSAGE))
 
@@ -27,13 +29,15 @@ async def get_random_picture_message(args: LoliconConfig) -> Message | None:
         if not data:
             return None
 
-        return await _build_lolicon_messages(data)
+        return await _build_lolicon_messages(data, is_private=is_private)
 
 
-async def _build_lolicon_messages(data: list[dict]) -> Message | None:
+async def _build_lolicon_messages(
+    data: list[dict], *, is_private: bool
+) -> Message | None:
     messages: list[MessageSegment] = []
     for item in data:
-        message = await build_lolicon_message(item)
+        message = await build_lolicon_message(item, is_private=is_private)
         if message is None:
             continue
         if messages:
@@ -77,6 +81,7 @@ def _parse_lolicon_api_data(raw_json: dict):
             'pid': item['pid'],
             'title': item['title'],
             'author': item['author'],
+            'r18': item['r18'],
             'urls': next(iter(item['urls'].values())),
         }
         for item in raw_json['data']

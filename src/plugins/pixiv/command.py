@@ -45,7 +45,7 @@ async def handle_main(  # noqa: PLR0913
 ) -> None:
     if pid.available:
         data = await get_pixiv_data(pid.result)
-        message = await build_pixiv_message(data)
+        message = await build_pixiv_message(data, is_private=event.is_private)
         if message is None:
             await _finish(event, '图片获取失败')
             return
@@ -61,7 +61,7 @@ async def handle_main(  # noqa: PLR0913
         quality=image_quality,
         exclude_ai=exclude_ai.available,
     )
-    message = await get_random_picture_message(config)
+    message = await get_random_picture_message(config, is_private=event.is_private)
     if message is None:
         await _finish(event, '图片获取失败')
         return

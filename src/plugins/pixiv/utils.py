@@ -1,8 +1,11 @@
+import asyncio
+from io import BytesIO
 from typing import TYPE_CHECKING
 
 from httpx import HTTPError
 from nonebot import logger
 from nonebot.adapters.milky import Message, MessageEvent
+from PIL import Image
 
 from src.plugins.lib import web_utils
 
@@ -38,3 +41,23 @@ def parse_tags(raw_tag: str | None) -> list[str]:
     if not raw_tag:
         return []
     return [tag.strip() for tag in raw_tag.replace('，', ',').split(',') if tag.strip()]
+
+
+def _to_pil(raw: bytes) -> Image.Image:
+    image = Image.open(BytesIO(raw))
+    image.load()
+    return image
+
+
+async def to_pill(raw: bytes) -> Image.Image:
+    return await asyncio.to_thread(_to_pil, raw)
+
+
+def _to_bytes(image: Image.Image) -> bytes:
+    buffer = BytesIO()
+    image.save(buffer, format='WEBP', lossless=True, method=2)
+    return buffer.getvalue()
+
+
+async def to_bytes(image: Image.Image) -> bytes:
+    return await asyncio.to_thread(_to_bytes, image)

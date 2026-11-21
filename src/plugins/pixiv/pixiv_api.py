@@ -31,4 +31,5 @@ def _parse_illust_data(raw_json: dict) -> dict:
         'title': body.get('illustTitle') or body.get('title'),
         'urls': body.get('urls'),
         'userName': body.get('userName'),
+        'xRestrict': body.get('xRestrict'),
     }

@@ -1,6 +1,6 @@
 from typing import Literal
 
-from .config import LoliconConfig, PixivImageQuality, R18Mode
+from .config import DEFAULT_LOLICON_CONFIG, LoliconConfig, PixivImageQuality, R18Mode
 
 QualityArg = Literal[
     'mini',
@@ -31,7 +31,7 @@ QUALITY_ALIAS: dict[QualityArg, PixivImageQuality] = {
 
 def resolve_quality(quality: QualityArg | None) -> PixivImageQuality:
     if quality is None:
-        return LoliconConfig().size
+        return DEFAULT_LOLICON_CONFIG.size
     return QUALITY_ALIAS[quality]
 
 
@@ -45,7 +45,7 @@ def build_lolicon_config(
 ) -> LoliconConfig:
     return LoliconConfig(
         r18=R18Mode.R18 if r18 else R18Mode.NON_R18,
-        num=num or 1,
+        num=max(1, num) if num is not None else DEFAULT_LOLICON_CONFIG.num,
         tag=tags,
         size=quality,
         exclude_ai=exclude_ai,
