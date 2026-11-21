@@ -13,6 +13,10 @@ dependencies = [
     "nonebot-plugin-orm>=0.8.3",
     "nonebot-plugin-htmlkit>=0.1.0rc5",
     "furl>=2.1.4",
+    "ddgs>=9,<10",
+    "beautifulsoup4>=4.12,<5",
+    "python-dotenv>=1,<2",
+    "httpx>=0.27,<0.29",
 ]
 
 [project.optional-dependencies]
