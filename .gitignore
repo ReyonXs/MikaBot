@@ -22,6 +22,8 @@ eggs/
 lib/
 !src/plugins/lib/
 !src/plugins/lib/**
+src/plugins/lib/**/__pycache__/
+src/plugins/lib/**/*.py[cod]
 lib64/
 parts/
 sdist/
