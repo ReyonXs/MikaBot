@@ -34,7 +34,7 @@ async def handle_config(event: MessageEvent) -> None:
 
 
 @command.handle()
-async def handle_main(  # noqa: PLR0913
+async def handle_main(  # noqa: PLR0913, PLR0917
     event: MessageEvent,
     pid: Match[int],
     tag: Match[str],
