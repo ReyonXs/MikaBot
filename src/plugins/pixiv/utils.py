@@ -49,7 +49,7 @@ def _to_pil(raw: bytes) -> Image.Image:
     return image
 
 
-async def to_pill(raw: bytes) -> Image.Image:
+async def to_pil(raw: bytes) -> Image.Image:
     return await asyncio.to_thread(_to_pil, raw)
 
 

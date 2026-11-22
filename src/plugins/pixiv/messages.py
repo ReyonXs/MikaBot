@@ -4,7 +4,7 @@ from nonebot.adapters.milky import Message, MessageSegment
 
 from src.plugins.lib.mirage_colored import generate
 
-from .utils import get_image, to_bytes, to_pill
+from .utils import get_image, to_bytes, to_pil
 
 
 async def _build_image_message(
@@ -15,7 +15,7 @@ async def _build_image_message(
         return None
 
     if is_r18:
-        image = await to_bytes(await generate(await to_pill(image)))
+        image = await to_bytes(await generate(await to_pil(image)))
 
     return Message(
         [
