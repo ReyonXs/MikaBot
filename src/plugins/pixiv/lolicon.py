@@ -76,16 +76,27 @@ def _parse_lolicon_api_data(raw_json: dict):
     if error:
         logger.error(f'Lolicon API 调用错误: {error}')
         return []
-    return [
-        {
-            'pid': item['pid'],
-            'title': item['title'],
-            'author': item['author'],
-            'r18': item['r18'],
-            'urls': next(iter(item['urls'].values())),
-        }
-        for item in raw_json['data']
-    ]
+    pictures = []
+    for item in raw_json['data']:
+        urls = item.get('urls')
+        if not isinstance(urls, dict):
+            continue
+        image_url = next(
+            (url for url in urls.values() if isinstance(url, str) and url.strip()),
+            None,
+        )
+        if image_url is None:
+            continue
+        pictures.append(
+            {
+                'pid': item['pid'],
+                'title': item['title'],
+                'author': item['author'],
+                'r18': item['r18'],
+                'urls': image_url,
+            }
+        )
+    return pictures
 
 
 async def _get_lolicon_api_data(args: LoliconConfig) -> list:

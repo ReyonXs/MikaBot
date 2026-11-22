@@ -3,7 +3,7 @@ name = "Mika"
 version = "0.1.0"
 description = "Mika"
 readme = "README.md"
-requires-python = ">=3.10, <4.0"
+requires-python = ">=3.11, <4.0"
 dependencies = [
     "nonebot2[fastapi,httpx,websockets]>=2.5.0",
     "nonebot-adapter-milky>=1.2.0",

@@ -1,6 +1,7 @@
 from furl import furl
 from nonebot import logger
 from nonebot.adapters.milky import Message, MessageSegment
+from PIL import Image
 
 from src.plugins.lib.mirage_colored import generate
 
@@ -15,7 +16,12 @@ async def _build_image_message(
         return None
 
     if is_r18:
-        image = await to_bytes(await generate(await to_pil(image)))
+        try:
+            decoded = await to_pil(image)
+        except (OSError, Image.DecompressionBombError) as exc:
+            logger.warning(f'图片解码失败: {exc}')
+            return None
+        image = await to_bytes(await generate(decoded))
 
     return Message(
         [

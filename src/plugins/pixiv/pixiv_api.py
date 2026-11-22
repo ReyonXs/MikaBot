@@ -26,7 +26,9 @@ async def _get_illust_data(pid: int) -> dict:
 
 
 def _parse_illust_data(raw_json: dict) -> dict:
-    body = raw_json.get('body', {})
+    body = raw_json.get('body')
+    if raw_json.get('error') or not isinstance(body, dict):
+        return {}
     return {
         'title': body.get('illustTitle') or body.get('title'),
         'urls': body.get('urls'),
