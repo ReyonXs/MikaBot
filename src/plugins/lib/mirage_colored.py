@@ -154,7 +154,7 @@ def _pack_rgba(
 
 
 @njit(cache=True, fastmath=True, nogil=True, boundscheck=False, inline='always')
-def _compute_pixel(  # noqa: PLR0913
+def _compute_pixel(  # noqa: PLR0913, PLR0917
     ir: np.float32,
     ig: np.float32,
     ib: np.float32,
