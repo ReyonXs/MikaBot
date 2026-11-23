@@ -108,5 +108,5 @@ async def _get_lolicon_api_data(args: LoliconConfig) -> list:
 
         return _parse_lolicon_api_data(response.json())
     except HTTPError as exc:
-        logger.error(f'LOLICON API 请求失败: {exc}')
+        logger.error(f'LOLICON API 请求失败: {exc!r}')
         return []

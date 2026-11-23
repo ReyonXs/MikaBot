@@ -21,7 +21,7 @@ async def _get_illust_data(pid: int) -> dict:
 
         return response.json()
     except HTTPError as exc:
-        logger.error(f'图片数据请求失败: {exc}')
+        logger.error(f'图片数据请求失败: {exc!r}')
         return {}
 
 

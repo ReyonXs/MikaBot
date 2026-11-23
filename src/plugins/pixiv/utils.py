@@ -22,7 +22,7 @@ async def get_image(url: 'furl') -> bytes | None:
         response.raise_for_status()
 
     except HTTPError as exc:
-        logger.error(f'图片请求失败: {exc}')
+        logger.error(f'图片请求失败: {exc!r}')
     else:
         return response.content
 

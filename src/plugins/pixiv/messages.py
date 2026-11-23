@@ -19,7 +19,7 @@ async def _build_image_message(
         try:
             decoded = await to_pil(image)
         except (OSError, Image.DecompressionBombError) as exc:
-            logger.warning(f'图片解码失败: {exc}')
+            logger.warning(f'图片解码失败: {exc!r}')
             return None
         image = await to_bytes(await generate(decoded))
 
