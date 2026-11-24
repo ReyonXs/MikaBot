@@ -1,3 +1,4 @@
+import asyncio
 from enum import IntEnum, StrEnum
 
 from furl import furl
@@ -7,6 +8,7 @@ HEADERS = {
     'Referer': 'https://www.pixiv.net/',
 }
 LOLICON_API = furl('https://api.lolicon.app/setu/v2')
+DOWNLOAD_LIMIT = asyncio.Semaphore(4)
 
 
 class PixivImageQuality(StrEnum):

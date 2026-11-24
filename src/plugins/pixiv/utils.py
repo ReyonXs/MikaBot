@@ -9,13 +9,18 @@ from PIL import Image
 
 from src.plugins.lib import web_utils
 
-from .config import HEADERS
+from .config import DOWNLOAD_LIMIT, HEADERS
 
 if TYPE_CHECKING:
     from furl import furl
 
 
 async def get_image(url: 'furl') -> bytes | None:
+    async with DOWNLOAD_LIMIT:
+        return await _get_image(url)
+
+
+async def _get_image(url: 'furl') -> bytes | None:
     client = web_utils.get_client()
     try:
         response = await client.get(url.url, headers=HEADERS)
