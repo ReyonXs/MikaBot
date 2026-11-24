@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Derived from Mirage_Cloak: https://github.com/TankFactory/Mirage_Cloak
+# Modified for MikaBot.
+
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import Final
