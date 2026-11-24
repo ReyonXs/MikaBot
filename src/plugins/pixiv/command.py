@@ -1,4 +1,5 @@
 from arclet.alconna import Alconna, Args, CommandMeta, Option, Subcommand
+from nonebot import logger
 from nonebot.adapters.milky import Message, MessageEvent  # noqa: TC002
 from nonebot_plugin_alconna import AlconnaQuery, Match, Query, on_alconna
 
@@ -45,6 +46,7 @@ async def handle_main(  # noqa: PLR0913, PLR0917
 ) -> None:
     if pid.available:
         data = await get_pixiv_data(pid.result)
+        logger.debug(f'data: {data}')
         message = await build_pixiv_message(data, is_private=event.is_private)
         if message is None:
             await _finish(event, '图片获取失败')
