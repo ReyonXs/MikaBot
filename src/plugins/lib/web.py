@@ -1,4 +1,4 @@
-from httpx import AsyncClient
+from httpx import AsyncClient, AsyncHTTPTransport
 from nonebot import get_driver
 
 HEADERS = {
@@ -12,7 +12,9 @@ class WebUtils:
 
     async def startup(self) -> None:
         if self.client is None or self.client.is_closed:
-            self.client = AsyncClient(headers=HEADERS)
+            self.client = AsyncClient(
+                headers=HEADERS, transport=AsyncHTTPTransport(retries=3)
+            )
 
     async def shutdown(self) -> None:
         if self.client is not None and not self.client.is_closed:
