@@ -10,17 +10,18 @@ from PIL import Image
 from src.plugins.lib import web_utils
 
 from .config import DOWNLOAD_LIMIT, HEADERS
+from .errors import PixivError
 
 if TYPE_CHECKING:
     from furl import furl
 
 
-async def get_image(url: 'furl') -> bytes | None:
+async def get_image(url: 'furl') -> bytes:
     async with DOWNLOAD_LIMIT:
         return await _get_image(url)
 
 
-async def _get_image(url: 'furl') -> bytes | None:
+async def _get_image(url: 'furl') -> bytes:
     client = web_utils.get_client()
     try:
         response = await client.get(url.url, headers=HEADERS)
@@ -28,8 +29,11 @@ async def _get_image(url: 'furl') -> bytes | None:
 
     except HTTPError as exc:
         logger.error(f'图片请求失败: {exc!r}')
+        raise PixivError(f'图片请求失败: {exc!r}') from exc  # noqa: TRY003
     else:
-        return response.content
+        if result := response.content:
+            return result
+        raise PixivError('图片获取失败')
 
 
 def with_reply(event: MessageEvent, message: str | Message) -> Message:

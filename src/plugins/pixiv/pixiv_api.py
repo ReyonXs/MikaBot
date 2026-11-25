@@ -6,6 +6,7 @@ from nonebot import logger
 from src.plugins.lib import web_utils
 
 from .config import HEADERS
+from .errors import PixivError
 
 
 async def get_pixiv_data(pid: int) -> dict:
@@ -14,18 +15,20 @@ async def get_pixiv_data(pid: int) -> dict:
     )
     data = _parse_illust_data(raw_data)
     urls = _parse_images_data(raw_urls)
-    if data and urls:
-        data['urls'] = urls
-        return data
-    return {}
+
+    missing = [name for name, result in (('数据', data), ('图片', urls)) if not result]
+    if missing:
+        raise PixivError(f'{"与".join(missing)}获取失败')
+
+    data['urls'] = urls
+    return data
 
 
 async def _get_images_data(pid: int) -> dict:
     client = web_utils.get_client()
     try:
         response = await client.get(
-            f'https://www.pixiv.net/ajax/illust/{pid}/pages',
-            headers=HEADERS
+            f'https://www.pixiv.net/ajax/illust/{pid}/pages', headers=HEADERS
         )
         response.raise_for_status()
 
@@ -45,9 +48,7 @@ def _parse_images_data(raw_json: dict) -> list:
 async def _get_illust_data(pid: int) -> dict:
     client = web_utils.get_client()
     try:
-        response = await client.get(
-            f'https://www.pixiv.net/ajax/illust/{pid}'
-        )
+        response = await client.get(f'https://www.pixiv.net/ajax/illust/{pid}')
         response.raise_for_status()
 
         return response.json()

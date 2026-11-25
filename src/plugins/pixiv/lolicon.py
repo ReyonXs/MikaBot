@@ -8,6 +8,7 @@ from nonebot.adapters.milky import Message, MessageSegment
 from src.plugins.lib import web_utils
 
 from .config import DEFAULT_LOLICON_CONFIG, LOLICON_API, LoliconConfig
+from .errors import PixivError
 from .messages import build_lolicon_message
 
 if TYPE_CHECKING:
@@ -20,32 +21,27 @@ _lolicon_request_lock = asyncio.Lock()
 
 async def get_random_picture_message(
     args: LoliconConfig, *, is_private: bool
-) -> Message | None:
+) -> Message:
     if _lolicon_request_lock.locked():
         return Message(MessageSegment.text(_LOLICON_BUSY_MESSAGE))
 
     async with _lolicon_request_lock:
         data = await _get_lolicon_api_data(args)
-        if not data:
-            return None
-
         return await _build_lolicon_messages(data, is_private=is_private)
 
 
 async def _build_lolicon_messages(
     data: list[dict], *, is_private: bool
-) -> Message | None:
+) -> Message:
+    if not data:
+        raise PixivError('图片获取失败')
+
     messages: list[MessageSegment] = []
-    for item in data:
+    for index, item in enumerate(data):
         message = await build_lolicon_message(item, is_private=is_private)
-        if message is None:
-            continue
-        if messages:
+        if index:
             messages.append(MessageSegment.text(_MESSAGE_SEPARATOR))
         messages.extend(message)
-
-    if not messages:
-        return None
 
     return Message(messages)
 
@@ -71,11 +67,12 @@ def _build_lolicon_api_url(config: LoliconConfig = DEFAULT_LOLICON_CONFIG) -> 'f
     return url
 
 
-def _parse_lolicon_api_data(raw_json: dict):
+def _parse_lolicon_api_data(raw_json: dict) -> list:
     error = raw_json.get('error')
     if error:
-        logger.error(f'Lolicon API 调用错误: {error}')
-        return []
+        text = f'Lolicon API 调用错误: {error}'
+        logger.error(text)
+        raise PixivError(text)
     pictures = []
     for item in raw_json['data']:
         urls = item.get('urls')
@@ -108,5 +105,6 @@ async def _get_lolicon_api_data(args: LoliconConfig) -> list:
 
         return _parse_lolicon_api_data(response.json())
     except HTTPError as exc:
-        logger.error(f'LOLICON API 请求失败: {exc!r}')
-        return []
+        text = f'LOLICON API 请求失败: {exc!r}'
+        logger.error(text)
+        raise PixivError(text) from exc

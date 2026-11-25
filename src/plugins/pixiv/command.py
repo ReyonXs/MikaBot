@@ -4,6 +4,7 @@ from nonebot.adapters.milky import Message, MessageEvent  # noqa: TC002
 from nonebot_plugin_alconna import AlconnaQuery, Match, Query, on_alconna
 
 from .command_args import QualityArg, build_lolicon_config, resolve_quality
+from .errors import PixivError
 from .lolicon import get_random_picture_message
 from .messages import build_pixiv_message
 from .pixiv_api import get_pixiv_data
@@ -44,27 +45,23 @@ async def handle_main(  # noqa: PLR0913, PLR0917
     r18: Query[object] = AlconnaQuery('r18'),
     exclude_ai: Query[object] = AlconnaQuery('exclude_ai'),
 ) -> None:
-    if pid.available:
-        data = await get_pixiv_data(pid.result)
-        logger.debug(f'data: {data}')
-        message = await build_pixiv_message(data, is_private=event.is_private)
-        if message is None:
-            await _finish(event, '图片获取失败')
-            return
-        await _finish(event, message)
-        return
+    try:
+        if pid.available:
+            data = await get_pixiv_data(pid.result)
+            logger.debug(f'data: {data}')
+            message = await build_pixiv_message(data, is_private=event.is_private)
+            await _finish(event, message)
 
-    tags = parse_tags(tag.result if tag.available else None)
-    image_quality = resolve_quality(quality.result if quality.available else None)
-    config = build_lolicon_config(
-        tags=tags,
-        r18=r18.available,
-        num=num.result if num.available else None,
-        quality=image_quality,
-        exclude_ai=exclude_ai.available,
-    )
-    message = await get_random_picture_message(config, is_private=event.is_private)
-    if message is None:
-        await _finish(event, '图片获取失败')
-        return
-    await _finish(event, message)
+        tags = parse_tags(tag.result if tag.available else None)
+        image_quality = resolve_quality(quality.result if quality.available else None)
+        config = build_lolicon_config(
+            tags=tags,
+            r18=r18.available,
+            num=num.result if num.available else None,
+            quality=image_quality,
+            exclude_ai=exclude_ai.available,
+        )
+        message = await get_random_picture_message(config, is_private=event.is_private)
+        await _finish(event, message)
+    except PixivError as exc:
+        await _finish(event, str(exc))

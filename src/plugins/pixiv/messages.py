@@ -7,33 +7,26 @@ from PIL import Image
 
 from src.plugins.lib.mirage_colored import generate
 
+from .errors import PixivError
 from .utils import get_image, to_bytes, to_pil
 
 
 async def _build_image_message(
     image_urls: list, text: str, *, is_r18: bool
-) -> Message | None:
+) -> Message:
     images = await asyncio.gather(
         *(get_image(furl(image_url)) for image_url in image_urls)
     )
 
-    if any(not image for image in images):
-        return None
-
-    for item in images:
-        if not item and not isinstance(item, bytes):
-            return None
-
     if is_r18:
         try:
             for index, image in enumerate(images):
-                assert image is not None
                 decoded_image = await to_pil(image)
                 images[index] = await to_bytes(await generate(decoded_image))
 
         except (OSError, Image.DecompressionBombError) as exc:
             logger.warning(f'图片解码失败: {exc!r}')
-            return None
+            raise PixivError('图片解码失败') from exc
 
     image_segments = (MessageSegment.image(raw=image) for image in images)
 
@@ -45,16 +38,14 @@ async def _build_image_message(
     )
 
 
-async def build_pixiv_message(data: dict, *, is_private: bool) -> Message | None:
+async def build_pixiv_message(data: dict, *, is_private: bool) -> Message:
     page_urls = data.get('urls', [])
     image_urls = []
     for item in page_urls:
         url = item.get('original') or next(iter(item.values()), None)
         if url is None:
-            return None
+            raise PixivError('图片 URL 获取失败')  # noqa: TRY003
         image_urls.append(url)
-    if not image_urls:
-        return None
 
     is_r18 = False if is_private else bool(data.get('xRestrict'))
 
@@ -65,10 +56,10 @@ async def build_pixiv_message(data: dict, *, is_private: bool) -> Message | None
     )
 
 
-async def build_lolicon_message(data: dict, *, is_private: bool) -> Message | None:
+async def build_lolicon_message(data: dict, *, is_private: bool) -> Message:
     image_url = data.get('urls')
     if not image_url:
-        return None
+        raise PixivError('图片 URL 获取失败')  # noqa: TRY003
 
     is_r18 = False if is_private else data.get('r18', False)
     logger.debug(f'data: {data}')

@@ -1,0 +1,2 @@
+class PixivError(Exception):
+    pass
