@@ -1,5 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from anyio import open_file
 from httpx import AsyncClient, AsyncHTTPTransport
 from nonebot import get_driver
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from furl import furl
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36'  # noqa: E501
@@ -25,6 +35,20 @@ class WebUtils:
             msg = 'AsyncClient 尚未初始化'
             raise RuntimeError(msg)
         return self.client
+
+    async def download_file(
+        self, url: furl, target: Path, *, headers: dict | None = None
+    ) -> Path:
+        client = self.get_client()
+        async with client.stream(
+            'GET', url.url, headers=headers, follow_redirects=True, timeout=60
+        ) as response:
+            response.raise_for_status()
+            target.parent.mkdir(parents=True, exist_ok=True)
+            async with await open_file(target, 'wb') as output:
+                async for chunk in response.aiter_bytes(chunk_size=256 * 1024):
+                    await output.write(chunk)
+        return target
 
 
 web_utils = WebUtils()
