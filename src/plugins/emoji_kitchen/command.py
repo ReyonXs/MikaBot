@@ -2,11 +2,14 @@ from arclet.alconna import Alconna
 from httpx import HTTPError
 from nonebot import logger
 from nonebot.adapters.milky import (
+    Message,
     MessageEvent,
     MessageSegment,
 )
 from nonebot.typing import T_State  # noqa: TC002
 from nonebot_plugin_alconna import on_alconna
+
+from src.plugins.lib import with_reply
 
 from .emoji_codes import emoji_codes
 from .utils import (
@@ -40,18 +43,25 @@ emoji_pair = on_alconna(
 emoji_pair.shortcut(PAIR_PATTERN, command='emoji_kitchen', fuzzy=False)
 
 
+async def _finish(event: MessageEvent, message: str | Message) -> None:
+    await emoji_pair.finish(with_reply(event, message))
+
+
 @emoji_pair.handle()
-async def _(state: T_State) -> None:
+async def _(event: MessageEvent, state: T_State) -> None:
     left, right = state['emoji_kitchen_pair']
     url = await get_combination_url(left, right)
     if url is None:
-        await emoji_pair.finish('没有这个表情组合')
+        await _finish(event, '没有这个表情组合')
+        return
     try:
         image = await get_combination_image(url)
     except HTTPError as exc:
         logger.warning(f'组合图片下载失败 ({exc!r})')
-        await emoji_pair.finish('组合图片下载失败, 请稍后再试')
+        await _finish(event, '组合图片下载失败, 请稍后再试')
+        return
 
     if image is None:
-        await emoji_pair.finish('组合图片格式无效')
+        await _finish(event, '组合图片格式无效')
+        return
     await emoji_pair.finish(MessageSegment.image(raw=image))
