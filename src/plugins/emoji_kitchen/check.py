@@ -104,7 +104,7 @@ async def run_check() -> None:
     coalesce=True,
     misfire_grace_time=None,
 )
-async def schedule_weekly_update() -> None:
+async def _() -> None:
     schedule_check(timedelta(0))
 
 
