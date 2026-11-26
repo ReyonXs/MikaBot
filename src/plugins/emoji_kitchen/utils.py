@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import re
+from collections import OrderedDict
 from typing import TYPE_CHECKING
+from weakref import WeakValueDictionary
 
 from furl import furl
 from nonebot import logger, require
@@ -15,6 +17,7 @@ from nonebot_plugin_orm import get_session
 
 from .config import (
     COMBINATIONS_VIEW_NAME,
+    IMAGE_CACHE_SIZE,
     METADATA_DIRECTORY_URL,
     METADATA_FILENAME,
 )
@@ -32,6 +35,8 @@ COMBINATIONS = table(
     column('emoji2', Text),
     column('url', Text),
 )
+_image_cache: OrderedDict[str, bytes] = OrderedDict()
+_image_locks: WeakValueDictionary[str, asyncio.Lock] = WeakValueDictionary()
 
 
 def parse_emoji_pair(message: Message) -> tuple[str, str] | None:
@@ -52,10 +57,21 @@ async def get_combination_url(left: str, right: str) -> furl | None:
 
 
 async def get_combination_image(url: furl) -> bytes | None:
-    response = await web_utils.get_client().get(url.url, follow_redirects=True)
-    response.raise_for_status()
-    image = response.content
-    return image if image.startswith(b'\x89PNG\r\n\x1a\n') else None
+    key = url.url
+    async with _image_locks.setdefault(key, asyncio.Lock()):
+        if key in _image_cache:
+            _image_cache.move_to_end(key)
+            return _image_cache[key]
+
+        response = await web_utils.get_client().get(key, follow_redirects=True)
+        response.raise_for_status()
+        image = response.content
+        if not image.startswith(b'\x89PNG\r\n\x1a\n'):
+            return None
+        _image_cache[key] = image
+        if len(_image_cache) > IMAGE_CACHE_SIZE:
+            _image_cache.popitem(last=False)
+        return image
 
 
 async def get_metadata_entry() -> dict:
