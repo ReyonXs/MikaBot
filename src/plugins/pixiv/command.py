@@ -3,12 +3,14 @@ from nonebot import logger
 from nonebot.adapters.milky import Message, MessageEvent  # noqa: TC002
 from nonebot_plugin_alconna import AlconnaQuery, Match, Query, on_alconna
 
+from src.plugins.lib import with_reply
+
 from .command_args import QualityArg, build_lolicon_config, resolve_quality
 from .errors import PixivError
 from .lolicon import get_random_picture_message
 from .messages import build_pixiv_message
 from .pixiv_api import get_pixiv_data
-from .utils import parse_tags, with_reply
+from .utils import parse_tags
 
 command = on_alconna(
     Alconna(

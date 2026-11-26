@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 from httpx import HTTPError
 from nonebot import logger
-from nonebot.adapters.milky import Message, MessageEvent
 from PIL import Image
 
 from src.plugins.lib import web_utils
@@ -34,16 +33,6 @@ async def _get_image(url: 'furl') -> bytes:
         if result := response.content:
             return result
         raise PixivError('图片获取失败')
-
-
-def with_reply(event: MessageEvent, message: str | Message) -> Message:
-    content = Message(message)
-    if event.is_private:
-        return content
-
-    reply_message = Message([event.reply_to])
-    reply_message.extend(content)
-    return reply_message
 
 
 def parse_tags(raw_tag: str | None) -> list[str]:
