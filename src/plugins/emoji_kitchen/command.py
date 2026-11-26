@@ -41,7 +41,7 @@ emoji_pair.shortcut(PAIR_PATTERN, command='emoji_kitchen', fuzzy=False)
 
 
 @emoji_pair.handle()
-async def send_combination(state: T_State) -> None:
+async def _(state: T_State) -> None:
     left, right = state['emoji_kitchen_pair']
     url = await get_combination_url(left, right)
     if url is None:
